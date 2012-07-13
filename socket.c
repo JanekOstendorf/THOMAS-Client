@@ -16,13 +16,11 @@ void error(const char *msg)
     exit(0);
 }
 
-int socket_client_start(int axis[])
-{
+int socket_send(char buffer[]) {
+    
     int sockfd, n;
     struct sockaddr_in serv_addr;
     struct hostent *server;
-
-    char buffer[256];
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) 
         error("ERROR opening socket");
@@ -41,16 +39,31 @@ int socket_client_start(int axis[])
         error("ERROR connecting");
     bzero(buffer,256);
     
+    n = write(sockfd,buffer,strlen(buffer));
+    if (n < 0) 
+         error("ERROR writing to socket");
+    close(sockfd);
+    return 0;
+    
+}
+
+int socket_send_js(int axis[], char buttons[])
+{
+
+    char buffer[256];
+    
     for(int i = 0; i < 4; i++) {
         
         buffer[i] = axis[i];
         
     }
     
-    n = write(sockfd,buffer,strlen(buffer));
-    if (n < 0) 
-         error("ERROR writing to socket");
-    close(sockfd);
-    return 0;
+    for(int i = 0; i < 9; i++) {
+        
+        buffer[i+4] = buttons[i];
+        
+    }
+    
+    return socket_send(buffer);
 
 }
